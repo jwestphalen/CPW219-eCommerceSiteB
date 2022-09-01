@@ -17,7 +17,7 @@ namespace CPW219_eCommerceSiteB.Controllers
         {
             //List<Game> games = _context.Games.ToList(); //Method Syntax
             List<Game> games = await (from game in _context.Games
-                                select game).ToListAsync(); //Query Syntax
+                                      select game).ToListAsync(); //Query Syntax
 
             return View(games);
         }
@@ -44,12 +44,11 @@ namespace CPW219_eCommerceSiteB.Controllers
             return View(g);
         }
 
-        [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
             Game? gameToEdit = await _context.Games.FindAsync(id);
 
-            if(gameToEdit == null)
+            if (gameToEdit == null)
             {
                 return NotFound();
             }
@@ -70,6 +69,35 @@ namespace CPW219_eCommerceSiteB.Controllers
             }
 
             return View(gameModel);
+        }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            Game? gameToDelete = await _context.Games.FindAsync(id);
+
+            if (gameToDelete == null)
+            {
+                return NotFound();
+            }
+
+            return View(gameToDelete);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            Game gameToDelete = await _context.Games.FindAsync(id);
+
+            if(gameToDelete != null)
+            {
+                _context.Games.Remove(gameToDelete);
+                await _context.SaveChangesAsync();
+                TempData["Message"] = gameToDelete.Title + " was deleted successfullly";
+                return RedirectToAction("Index");
+            }
+
+            TempData["Message"] = "This game was already deleted";
+            return RedirectToAction("Index");
         }
     }
 }
