@@ -1,6 +1,7 @@
 ﻿using CPW219_eCommerceSite.Data;
 using CPW219_eCommerceSite.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CPW219_eCommerceSiteB.Controllers
 {
@@ -12,13 +13,23 @@ namespace CPW219_eCommerceSiteB.Controllers
             _context = context;
         }
 
+        public async Task<IActionResult> Index()
+        {
+            //List<Game> games = _context.Games.ToList(); //Method Syntax
+            List<Game> games = await (from game in _context.Games
+                                select game).ToListAsync(); //Query Syntax
+
+            return View(games);
+        }
+
+        [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
-                public async Task<IActionResult> Create(Game g)
+        public async Task<IActionResult> Create(Game g)
         {
             if (ModelState.IsValid)
             {
