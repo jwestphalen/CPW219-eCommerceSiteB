@@ -1,4 +1,5 @@
 ﻿using CPW219_eCommerceSite.Models;
+using CPW219_eCommerceSiteB.Models;
 using Microsoft.EntityFrameworkCore;
 namespace CPW219_eCommerceSite.Data
 {
@@ -11,5 +12,7 @@ namespace CPW219_eCommerceSite.Data
         }
 
         public DbSet<Game> Games { get; set; }
+
+        public DbSet<Member> Members { get; set; }
     }
 }
