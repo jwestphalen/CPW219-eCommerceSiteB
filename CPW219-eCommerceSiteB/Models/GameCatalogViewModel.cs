@@ -1,4 +1,6 @@
-﻿using CPW219_eCommerceSite.Models;
+﻿using CPW219_eCommerceSiteB.Models;
+using CPW219_eCommerceSite.Models;
+
 
 namespace CPW219_eCommerceSiteB.Models
 {
