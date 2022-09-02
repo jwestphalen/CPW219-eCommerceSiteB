@@ -1,5 +1,6 @@
 ﻿using CPW219_eCommerceSite.Data;
 using CPW219_eCommerceSite.Models;
+using CPW219_eCommerceSiteB.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,13 +14,26 @@ namespace CPW219_eCommerceSiteB.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? id)
         {
-            //List<Game> games = _context.Games.ToList(); //Method Syntax
-            List<Game> games = await (from game in _context.Games
-                                      select game).ToListAsync(); //Query Syntax
+            const int NumGamesToDisplayPerPage = 3;
+            const int pageOffSet = 1; // used to offset in order to figure out number of pages to skip
 
-            return View(games);
+            int currPage = id ?? 1; // set currPage to id if it has a value, otherwise use 1
+            
+            int totalNumOfProducts = await _context.Games.CountAsync();
+            double maxNumPages = Math.Ceiling((double)totalNumOfProducts / NumGamesToDisplayPerPage);
+            int lastPage = Convert.ToInt32(maxNumPages); // Rounding pages up, to next whole number
+
+            List<Game> games = await (from game in _context.Games
+                                      select game).Skip(NumGamesToDisplayPerPage * (currPage - pageOffSet))
+                                      .Take(NumGamesToDisplayPerPage)
+                                      .ToListAsync(); //Query Syntax
+
+
+            GameCatalogViewModel catalogModel = new(games, lastPage, currPage);
+
+            return View(catalogModel);
         }
 
         [HttpGet]
