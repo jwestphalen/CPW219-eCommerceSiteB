@@ -19,7 +19,7 @@ namespace CPW219_eCommerceSiteB.Controllers
         {
             Game? gameToAdd = _context.Games.Where(g => g.GameId == id).SingleOrDefault();
 
-            if(gameToAdd == null)
+            if (gameToAdd == null)
             {
                 // Game with specified id does not exist
                 TempData["Message"] = "Sorry, that game no longer exists";
@@ -31,21 +31,26 @@ namespace CPW219_eCommerceSiteB.Controllers
                 GameId = gameToAdd.GameId,
                 Title = gameToAdd.Title,
                 Price = gameToAdd.Price
-                
+
             };
 
             List<CartGameViewModel> cartGames = GetExistingCartData();
             cartGames.Add(cartGame);
 
+            WriteShoppingCartCookie(cartGames);
+            // ToDo: Add item to a shopping cart cookie
+            TempData["Message"] = "Item added to cart";
+            return RedirectToAction("Index", "Games");
+        }
+
+        private void WriteShoppingCartCookie(List<CartGameViewModel> cartGames)
+        {
             string cookieData = JsonConvert.SerializeObject(cartGames);
 
             HttpContext.Response.Cookies.Append("ShoppingCart", cookieData, new CookieOptions()
             {
                 Expires = DateTimeOffset.Now.AddYears(1)
             });
-            // ToDo: Add item to a shopping cart cookie
-            TempData["Message"] = "Item added to cart";
-            return RedirectToAction("Index", "Games");
         }
 
         /// <summary>
@@ -64,6 +69,26 @@ namespace CPW219_eCommerceSiteB.Controllers
             }
 
             return JsonConvert.DeserializeObject<List<CartGameViewModel>>(cookie);
+        }
+
+        public IActionResult Summary()
+        {
+            //Read shopping cart data and convert to list of view model
+            List<CartGameViewModel> cartGames = GetExistingCartData();
+            return View(cartGames);
+        }
+
+        public IActionResult Remove(int id)
+        {
+            List<CartGameViewModel> cartGames = GetExistingCartData();
+
+            CartGameViewModel? targetGame = cartGames.FirstOrDefault(g => g.GameId == id);
+
+            cartGames.Remove(targetGame);
+
+            WriteShoppingCartCookie(cartGames);
+
+            return RedirectToAction(nameof(Summary));   
         }
     }
 }
